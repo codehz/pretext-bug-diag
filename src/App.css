@@ -299,6 +299,11 @@
   color: var(--color-muted);
 }
 
+.line-width--overflow {
+  color: #bf2f2f;
+  font-weight: 700;
+}
+
 .line-fragments {
   overflow-wrap: anywhere;
 }

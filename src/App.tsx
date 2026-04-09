@@ -25,6 +25,7 @@ const MIN_PREVIEW_WIDTH = 220
 const MAX_PREVIEW_WIDTH = 760
 const MIN_FONT_SIZE = 16
 const MAX_FONT_SIZE = 30
+const WIDTH_OVERFLOW_TOLERANCE = 0.1
 
 type InlineStyleName = 'body' | 'bold' | 'italic'
 
@@ -428,7 +429,15 @@ function App() {
               {previewData.lines.map((line, index) => (
                 <div className="line-row line-row--rich" key={`${index}-${line.width}`}>
                   <span className="line-index">L{index + 1}</span>
-                  <span className="line-width">{line.width.toFixed(1)}px</span>
+                  <span
+                    className={
+                      line.width - previewWidth >= WIDTH_OVERFLOW_TOLERANCE
+                        ? 'line-width line-width--overflow'
+                        : 'line-width'
+                    }
+                  >
+                    {line.width.toFixed(1)}px
+                  </span>
                   <div className="line-fragments">
                     {line.fragments.map((fragment, fragmentIndex) => (
                       <span
