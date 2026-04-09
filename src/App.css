@@ -135,6 +135,55 @@
   color: var(--color-muted);
 }
 
+.mode-toggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 8px;
+  border-radius: 18px;
+  background: rgba(244, 236, 222, 0.92);
+  border: 1px solid rgba(73, 58, 39, 0.08);
+}
+
+.mode-button {
+  border: 0;
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: transparent;
+  color: var(--color-muted);
+  font: 600 14px/1.3 var(--font-sans);
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.mode-button:hover {
+  color: var(--color-title);
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.mode-button:focus-visible {
+  outline: 2px solid rgba(217, 125, 84, 0.38);
+  outline-offset: 2px;
+}
+
+.mode-button--active {
+  color: #7d3215;
+  background:
+    linear-gradient(135deg, rgba(255, 252, 245, 0.98), rgba(255, 243, 226, 0.95));
+  box-shadow: 0 8px 20px rgba(120, 79, 26, 0.12);
+}
+
+.mode-hint {
+  margin: 0 0 18px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--color-muted);
+}
+
 .control-grid {
   display: grid;
   gap: 16px;

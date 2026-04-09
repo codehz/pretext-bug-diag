@@ -27,6 +27,7 @@ const MIN_FONT_SIZE = 16
 const MAX_FONT_SIZE = 30
 const WIDTH_OVERFLOW_TOLERANCE = 0.1
 
+type RenderMode = 'rich-inline' | 'raw-text'
 type InlineStyleName = 'body' | 'bold' | 'italic'
 
 type ParsedToken = {
@@ -129,13 +130,27 @@ function countStyledTokens(tokens: ParsedToken[]) {
   return tokens.filter(token => token.style !== 'body').length
 }
 
+function buildPreviewTokens(text: string, renderMode: RenderMode): ParsedToken[] {
+  if (renderMode === 'raw-text') {
+    if (text.length === 0) {
+      return []
+    }
+
+    return [{ style: 'body', text }]
+  }
+
+  return parseInlineRichText(text)
+}
+
 function App() {
   const [text, setText] = useState(SAMPLE_TEXT)
   const deferredText = useDeferredValue(text)
   const [previewWidth, setPreviewWidth] = useState(460)
   const [fontSize, setFontSize] = useState(22)
+  const [renderMode, setRenderMode] = useState<RenderMode>('rich-inline')
 
   const lineHeight = Math.round(fontSize * 1.75)
+  const isRichMode = renderMode === 'rich-inline'
 
   const textStyles = useMemo(
     () => ({
@@ -155,14 +170,14 @@ function App() {
     [fontSize],
   )
 
-  const parsedTokens = useMemo(
-    () => parseInlineRichText(deferredText),
-    [deferredText],
+  const previewTokens = useMemo(
+    () => buildPreviewTokens(deferredText, renderMode),
+    [deferredText, renderMode],
   )
 
   const previewData = useMemo(() => {
     const classNames: string[] = []
-    const items: RichInlineItem[] = parsedTokens.map(token => {
+    const items: RichInlineItem[] = previewTokens.map(token => {
       const config = textStyles[token.style]
       classNames.push(config.className)
       return {
@@ -190,9 +205,9 @@ function App() {
     return {
       lines,
       stats,
-      styledTokenCount: countStyledTokens(parsedTokens),
+      styledTokenCount: countStyledTokens(previewTokens),
     }
-  }, [parsedTokens, previewWidth, textStyles])
+  }, [previewTokens, previewWidth, textStyles])
 
   const previewBodyStyle: CSSProperties = {
     fontFamily: FONT_FAMILY,
@@ -209,9 +224,11 @@ function App() {
         <h1>Inline Rich Text Demo</h1>
         <p className="hero-copy">
           Enter rule-based source text on the left, then preview how pretext's
-          rich inline helpers split and lay it out on the right. This demo
-          currently supports two rules: text inside `“”` becomes bold, and text
-          inside `()` becomes italic.
+          rich inline helpers split and lay it out on the right. You can switch
+          between inline rich parsing and raw text passthrough to show that this
+          bug only appears when the source is materialized as rich inline
+          fragments. This demo currently supports two rules: text inside `“”`
+          becomes bold, and text inside `()` becomes italic.
         </p>
       </section>
 
@@ -220,7 +237,7 @@ function App() {
           <article className="card">
             <div className="section-heading">
               <h2>Text Input</h2>
-              <span className="badge">inline only</span>
+              <span className="badge">{isRichMode ? 'inline rich' : 'raw text'}</span>
             </div>
 
             <textarea
@@ -256,8 +273,9 @@ function App() {
             </div>
 
             <p className="hint">
-              Inline rich mode handles whitespace collapsing and line wrapping
-              like normal inline text.
+              {isRichMode
+                ? 'Inline rich mode handles whitespace collapsing and line wrapping like normal inline text.'
+                : 'Raw text mode skips rich parsing and forwards the original source as a single plain segment for layout.'}
               {deferredText !== text ? ' Reflowing…' : ''}
             </p>
           </article>
@@ -265,8 +283,37 @@ function App() {
           <article className="card">
             <div className="section-heading">
               <h2>Rules & Controls</h2>
-              <span className="badge warm">live preview</span>
+              <span className="badge warm">mode switch</span>
             </div>
+
+            <div className="mode-toggle" role="tablist" aria-label="Rendering mode">
+              <button
+                type="button"
+                className={isRichMode ? 'mode-button mode-button--active' : 'mode-button'}
+                aria-pressed={isRichMode}
+                onClick={() => {
+                  setRenderMode('rich-inline')
+                }}
+              >
+                Inline Rich
+              </button>
+              <button
+                type="button"
+                className={!isRichMode ? 'mode-button mode-button--active' : 'mode-button'}
+                aria-pressed={!isRichMode}
+                onClick={() => {
+                  setRenderMode('raw-text')
+                }}
+              >
+                Raw Text
+              </button>
+            </div>
+
+            <p className="mode-hint">
+              {isRichMode
+                ? '当前模式会把命中的片段拆成粗体和斜体 inline fragments，用来复现 bug。'
+                : '当前模式不会替换加粗和斜体，只把原始文本直接传给布局流程，用来证明 bug 不会出现。'}
+            </p>
 
             <div className="rule-list">
               <p>
@@ -370,7 +417,7 @@ function App() {
               </div>
               <div className="metric">
                 <span>Total Segments</span>
-                <strong>{parsedTokens.length}</strong>
+                <strong>{previewTokens.length}</strong>
               </div>
             </div>
           </article>
@@ -380,9 +427,11 @@ function App() {
           <article className="card preview-card">
             <div className="section-heading">
               <div>
-                <h2>Inline Rich Preview</h2>
+                <h2>{isRichMode ? 'Inline Rich Preview' : 'Raw Text Preview'}</h2>
                 <p className="canvas-subtitle">
-                  Each line comes from pretext's rich inline line range output.
+                  {isRichMode
+                    ? "Each line comes from pretext's rich inline line range output."
+                    : 'Each line is laid out from the original source text without inline style replacement.'}
                 </p>
               </div>
               <span className="canvas-size">{previewWidth}px</span>
@@ -421,8 +470,8 @@ function App() {
 
           <article className="card">
             <div className="section-heading">
-              <h2>Line-by-Line Fragments</h2>
-              <span className="badge">materialized</span>
+              <h2>{isRichMode ? 'Line-by-Line Fragments' : 'Line-by-Line Layout'}</h2>
+              <span className="badge">{isRichMode ? 'materialized' : 'passthrough'}</span>
             </div>
 
             <div className="line-list">
