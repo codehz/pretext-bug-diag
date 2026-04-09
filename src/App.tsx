@@ -14,9 +14,9 @@ import {
 } from '@chenglou/pretext/rich-inline'
 import './App.css'
 
-const SAMPLE_TEXT = `Pretext 的 inline rich 模式会把 “引号里的重点” 和 (括号里的补充说明) 标成不同颜色，并保持普通文本自然换行。你还可以继续输入 “新的强调片段” 或 (旁注)。`
+const CHINESE_SOURCE_TEXT = `Pretext 的 inline rich 模式会把 “引号里的重点” 和 (括号里的补充说明) 标成不同颜色，并保持普通文本自然换行。你还可以继续输入 “新的强调片段” 或 (旁注)。`
 
-const ALT_TEXT = `这里演示普通文本、 “强调内容” 、英文 mixed content，以及 (轻量注释) 如何一起参与 inline 布局。未闭合的标记会保持原样，比如 “这一段不会被解析。`
+const ENGLISH_TRANSLATION_TEXT = `In Pretext's inline rich mode, “key points inside quotes” and (extra notes inside parentheses) are highlighted with different colors while the rest of the text wraps naturally. You can also keep typing “new emphasized fragments” or (side notes).`
 
 const FONT_FAMILY =
   '"Avenir Next", "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif'
@@ -143,8 +143,8 @@ function buildPreviewTokens(text: string, renderMode: RenderMode): ParsedToken[]
 }
 
 function App() {
-  const [text, setText] = useState(SAMPLE_TEXT)
-  const deferredText = useDeferredValue(text)
+  const [sourceText, setSourceText] = useState(CHINESE_SOURCE_TEXT)
+  const deferredSourceText = useDeferredValue(sourceText)
   const [previewWidth, setPreviewWidth] = useState(460)
   const [fontSize, setFontSize] = useState(22)
   const [renderMode, setRenderMode] = useState<RenderMode>('rich-inline')
@@ -171,8 +171,8 @@ function App() {
   )
 
   const previewTokens = useMemo(
-    () => buildPreviewTokens(deferredText, renderMode),
-    [deferredText, renderMode],
+    () => buildPreviewTokens(deferredSourceText, renderMode),
+    [deferredSourceText, renderMode],
   )
 
   const previewData = useMemo(() => {
@@ -224,11 +224,12 @@ function App() {
         <h1>Inline Rich Text Demo</h1>
         <p className="hero-copy">
           Enter rule-based source text on the left, then preview how pretext's
-          rich inline helpers split and lay it out on the right. You can switch
-          between inline rich parsing and raw text passthrough to show that this
-          bug only appears when the source is materialized as rich inline
-          fragments. This demo currently supports two rules: text inside `“”`
-          and text inside `()` are highlighted with different colors.
+          rich inline helpers split and lay it out on the right. Load the
+          Chinese source and keep inline rich parsing enabled to reproduce the
+          bug, then compare it against the English translation or raw text mode
+          to show the issue is specific to Chinese + inline rich. This demo
+          currently supports two rules: text inside `“”` and text inside `()`
+          are highlighted with different colors.
         </p>
       </section>
 
@@ -242,10 +243,10 @@ function App() {
 
             <textarea
               className="text-editor"
-              value={text}
+              value={sourceText}
               spellCheck={false}
               onChange={(event) => {
-                setText(event.target.value)
+                setSourceText(event.target.value)
               }}
             />
 
@@ -254,36 +255,36 @@ function App() {
                 type="button"
                 onClick={() => {
                   startTransition(() => {
-                    setText(SAMPLE_TEXT)
+                    setSourceText(CHINESE_SOURCE_TEXT)
                   })
                 }}
               >
-                Sample A
+                Chinese Source
               </button>
               <button
                 type="button"
                 onClick={() => {
                   startTransition(() => {
-                    setText(ALT_TEXT)
+                    setSourceText(ENGLISH_TRANSLATION_TEXT)
                   })
                 }}
               >
-                Sample B
+                English Translation
               </button>
             </div>
 
             <p className="hint">
               {isRichMode
-                ? 'Inline rich mode handles whitespace collapsing and line wrapping like normal inline text.'
-                : 'Raw text mode skips rich parsing and forwards the original source as a single plain segment for layout.'}
-              {deferredText !== text ? ' Reflowing…' : ''}
+                ? 'Inline rich is the reproduction path: the bug should appear with the Chinese source here, while the English translation stays stable.'
+                : 'Raw text is the control path: even the Chinese source should no longer show the bug in this mode.'}
+              {deferredSourceText !== sourceText ? ' Reflowing…' : ''}
             </p>
           </article>
 
           <article className="card">
             <div className="section-heading">
               <h2>Rules & Controls</h2>
-              <span className="badge warm">mode switch</span>
+              <span className="badge warm">repro switch</span>
             </div>
 
             <div className="mode-toggle" role="tablist" aria-label="Rendering mode">
@@ -295,7 +296,7 @@ function App() {
                   setRenderMode('rich-inline')
                 }}
               >
-                Inline Rich
+                Inline Rich Repro
               </button>
               <button
                 type="button"
@@ -305,14 +306,14 @@ function App() {
                   setRenderMode('raw-text')
                 }}
               >
-                Raw Text
+                Raw Text Control
               </button>
             </div>
 
             <p className="mode-hint">
               {isRichMode
-                ? 'This mode splits matching spans into differently colored inline fragments so the bug can be reproduced.'
-                : 'This mode skips color replacement and sends the original source straight into layout so you can confirm the bug does not appear.'}
+                ? 'This mode splits matching spans into colored inline fragments. Use it with the Chinese source to reproduce the bug, and with the English translation as the negative control.'
+                : 'This mode skips color replacement and sends the original source straight into layout so you can confirm the bug is not caused by the raw text itself.'}
             </p>
 
             <div className="rule-list">
