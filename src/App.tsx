@@ -311,8 +311,8 @@ function App() {
 
             <p className="mode-hint">
               {isRichMode
-                ? '当前模式会把命中的片段拆成不同颜色的 inline fragments，用来复现 bug。'
-                : '当前模式不会替换颜色高亮，只把原始文本直接传给布局流程，用来证明 bug 不会出现。'}
+                ? 'This mode splits matching spans into differently colored inline fragments so the bug can be reproduced.'
+                : 'This mode skips color replacement and sends the original source straight into layout so you can confirm the bug does not appear.'}
             </p>
 
             <div className="rule-list">
