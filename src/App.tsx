@@ -205,10 +205,12 @@ function App() {
     <main className="app-shell">
       <section className="hero-panel">
         <p className="eyebrow">React + @chenglou/pretext/rich-inline</p>
-        <h1>Inline Rich 文本演示</h1>
+        <h1>Inline Rich Text Demo</h1>
         <p className="hero-copy">
-          左侧输入带规则的原始文本，右侧用 pretext 的 rich inline helper
-          做分片布局。当前示例支持两条规则：`“”` 内文本加粗，`()` 内文本倾斜。
+          Enter rule-based source text on the left, then preview how pretext's
+          rich inline helpers split and lay it out on the right. This demo
+          currently supports two rules: text inside `“”` becomes bold, and text
+          inside `()` becomes italic.
         </p>
       </section>
 
@@ -216,7 +218,7 @@ function App() {
         <section className="control-column">
           <article className="card">
             <div className="section-heading">
-              <h2>文本输入</h2>
+              <h2>Text Input</h2>
               <span className="badge">inline only</span>
             </div>
 
@@ -238,7 +240,7 @@ function App() {
                   })
                 }}
               >
-                示例 A
+                Sample A
               </button>
               <button
                 type="button"
@@ -248,35 +250,38 @@ function App() {
                   })
                 }}
               >
-                示例 B
+                Sample B
               </button>
             </div>
 
             <p className="hint">
-              inline rich 模式会按普通 inline 文本处理空白折叠与换行。
-              {deferredText !== text ? ' 正在重新布局…' : ''}
+              Inline rich mode handles whitespace collapsing and line wrapping
+              like normal inline text.
+              {deferredText !== text ? ' Reflowing…' : ''}
             </p>
           </article>
 
           <article className="card">
             <div className="section-heading">
-              <h2>规则与控制</h2>
-              <span className="badge warm">实时预览</span>
+              <h2>Rules & Controls</h2>
+              <span className="badge warm">live preview</span>
             </div>
 
             <div className="rule-list">
               <p>
-                <code>“强调文本”</code> 整段保留引号并渲染为粗体。
+                <code>“emphasized text”</code> keeps the quotes and renders the
+                full span in bold.
               </p>
               <p>
-                <code>(补充说明)</code> 整段保留括号并渲染为斜体。
+                <code>(side note)</code> keeps the parentheses and renders the
+                full span in italic.
               </p>
-              <p>未闭合或空内容标记会按普通文本保留。</p>
+              <p>Unclosed or empty markers are preserved as normal text.</p>
             </div>
 
             <div className="control-grid">
               <label className="control">
-                <span>预览宽度</span>
+                <span>Preview Width</span>
                 <input
                   type="range"
                   min={MIN_PREVIEW_WIDTH}
@@ -305,7 +310,7 @@ function App() {
               </label>
 
               <label className="control">
-                <span>字体大小</span>
+                <span>Font Size</span>
                 <input
                   type="range"
                   min={MIN_FONT_SIZE}
@@ -337,33 +342,33 @@ function App() {
 
           <article className="card">
             <div className="section-heading">
-              <h2>布局结果</h2>
+              <h2>Layout Metrics</h2>
               <span className="badge cool">precomputed</span>
             </div>
 
             <div className="metric-grid">
               <div className="metric">
-                <span>预览宽度</span>
+                <span>Preview Width</span>
                 <strong>{previewWidth}px</strong>
               </div>
               <div className="metric">
-                <span>字体大小</span>
+                <span>Font Size</span>
                 <strong>{fontSize}px</strong>
               </div>
               <div className="metric">
-                <span>行数</span>
+                <span>Line Count</span>
                 <strong>{previewData.stats.lineCount}</strong>
               </div>
               <div className="metric">
-                <span>最宽行</span>
+                <span>Widest Line</span>
                 <strong>{previewData.stats.maxLineWidth.toFixed(1)}px</strong>
               </div>
               <div className="metric">
-                <span>样式片段</span>
+                <span>Styled Segments</span>
                 <strong>{previewData.styledTokenCount}</strong>
               </div>
               <div className="metric">
-                <span>总片段</span>
+                <span>Total Segments</span>
                 <strong>{parsedTokens.length}</strong>
               </div>
             </div>
@@ -374,9 +379,9 @@ function App() {
           <article className="card preview-card">
             <div className="section-heading">
               <div>
-                <h2>Inline Rich 预览</h2>
+                <h2>Inline Rich Preview</h2>
                 <p className="canvas-subtitle">
-                  每一行都来自 pretext 的 rich inline line range 结果。
+                  Each line comes from pretext's rich inline line range output.
                 </p>
               </div>
               <span className="canvas-size">{previewWidth}px</span>
@@ -386,7 +391,9 @@ function App() {
               <div className="preview-scroller">
                 <div className="preview-surface" style={previewBodyStyle}>
                   {previewData.lines.length === 0 ? (
-                    <p className="empty-state">输入一些文本后，这里会显示 inline rich 预览。</p>
+                    <p className="empty-state">
+                      Enter some text to see the inline rich preview here.
+                    </p>
                   ) : (
                     previewData.lines.map((line, index) => (
                       <div
@@ -413,7 +420,7 @@ function App() {
 
           <article className="card">
             <div className="section-heading">
-              <h2>逐行 Fragments</h2>
+              <h2>Line-by-Line Fragments</h2>
               <span className="badge">materialized</span>
             </div>
 
