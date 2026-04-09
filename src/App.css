@@ -309,13 +309,11 @@
   font-weight: 500;
 }
 
-.frag--bold {
-  font-weight: 700;
+.frag--quote {
   color: #7d3215;
 }
 
-.frag--italic {
-  font-style: italic;
+.frag--note {
   color: #245056;
 }
 

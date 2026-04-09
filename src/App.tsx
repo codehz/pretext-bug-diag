@@ -14,7 +14,7 @@ import {
 } from '@chenglou/pretext/rich-inline'
 import './App.css'
 
-const SAMPLE_TEXT = `Pretext 的 inline rich 模式会把 “引号里的重点” 变成粗体，把 (括号里的补充说明) 变成斜体，并保持普通文本自然换行。你还可以继续输入 “新的强调片段” 或 (旁注)。`
+const SAMPLE_TEXT = `Pretext 的 inline rich 模式会把 “引号里的重点” 和 (括号里的补充说明) 标成不同颜色，并保持普通文本自然换行。你还可以继续输入 “新的强调片段” 或 (旁注)。`
 
 const ALT_TEXT = `这里演示普通文本、 “强调内容” 、英文 mixed content，以及 (轻量注释) 如何一起参与 inline 布局。未闭合的标记会保持原样，比如 “这一段不会被解析。`
 
@@ -28,7 +28,7 @@ const MAX_FONT_SIZE = 30
 const WIDTH_OVERFLOW_TOLERANCE = 0.1
 
 type RenderMode = 'rich-inline' | 'raw-text'
-type InlineStyleName = 'body' | 'bold' | 'italic'
+type InlineStyleName = 'body' | 'quote' | 'note'
 
 type ParsedToken = {
   style: InlineStyleName
@@ -90,10 +90,10 @@ function parseInlineRichText(text: string): ParsedToken[] {
 
     if (char === '“') {
       closingMarker = '”'
-      style = 'bold'
+      style = 'quote'
     } else if (char === '(') {
       closingMarker = ')'
-      style = 'italic'
+      style = 'note'
     }
 
     if (style === null) {
@@ -158,13 +158,13 @@ function App() {
         className: 'frag frag--body',
         font: `500 ${fontSize}px ${FONT_FAMILY}`,
       },
-      bold: {
-        className: 'frag frag--bold',
-        font: `700 ${fontSize}px ${FONT_FAMILY}`,
+      quote: {
+        className: 'frag frag--quote',
+        font: `500 ${fontSize}px ${FONT_FAMILY}`,
       },
-      italic: {
-        className: 'frag frag--italic',
-        font: `italic 500 ${fontSize}px ${FONT_FAMILY}`,
+      note: {
+        className: 'frag frag--note',
+        font: `500 ${fontSize}px ${FONT_FAMILY}`,
       },
     }),
     [fontSize],
@@ -228,7 +228,7 @@ function App() {
           between inline rich parsing and raw text passthrough to show that this
           bug only appears when the source is materialized as rich inline
           fragments. This demo currently supports two rules: text inside `“”`
-          becomes bold, and text inside `()` becomes italic.
+          and text inside `()` are highlighted with different colors.
         </p>
       </section>
 
@@ -311,18 +311,18 @@ function App() {
 
             <p className="mode-hint">
               {isRichMode
-                ? '当前模式会把命中的片段拆成粗体和斜体 inline fragments，用来复现 bug。'
-                : '当前模式不会替换加粗和斜体，只把原始文本直接传给布局流程，用来证明 bug 不会出现。'}
+                ? '当前模式会把命中的片段拆成不同颜色的 inline fragments，用来复现 bug。'
+                : '当前模式不会替换颜色高亮，只把原始文本直接传给布局流程，用来证明 bug 不会出现。'}
             </p>
 
             <div className="rule-list">
               <p>
                 <code>“emphasized text”</code> keeps the quotes and renders the
-                full span in bold.
+                full span with the quote highlight color.
               </p>
               <p>
                 <code>(side note)</code> keeps the parentheses and renders the
-                full span in italic.
+                full span with the note highlight color.
               </p>
               <p>Unclosed or empty markers are preserved as normal text.</p>
             </div>
@@ -412,7 +412,7 @@ function App() {
                 <strong>{previewData.stats.maxLineWidth.toFixed(1)}px</strong>
               </div>
               <div className="metric">
-                <span>Styled Segments</span>
+                <span>Highlighted Segments</span>
                 <strong>{previewData.styledTokenCount}</strong>
               </div>
               <div className="metric">
